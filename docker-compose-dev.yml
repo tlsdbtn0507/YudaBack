@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  backend:
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./back
+    container_name: app_back
+    volumes:
+      - /app/node_modules
+      - ./back:/app
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - back/.env
+    ports:
+      - "3002:3002"
+    
+  postgres:
+    build: ./postgres
+    restart: unless-stopped
+    container_name: app_postgres
+    ports:
+      - "5432:5432"
+    
+    volumes:
+      - ./postgres/postgres_data:/var/lib/postgres
+      - ./postgres/sqls/:/docker-entrypoint-initdb.d/
+
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DATABASE=back
