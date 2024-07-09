@@ -1,5 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
+const env = process.env.NODE_ENV
+
 export const typeORMConfig: TypeOrmModuleOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST,
@@ -9,8 +11,7 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   database: process.env.POSTGRES_DATABASE,
   entities: [__dirname + "/../**/*.entity.{js,ts}"],
   synchronize: !!process.env.POSTGRES_SYNCHRONIZE,
-  ssl:true
-  // ... process.env.NODE_ENV === 'production' && sslConfig  
+  ssl: env !== 'development'
 }
 
 console.log(typeORMConfig)
