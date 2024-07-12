@@ -1,0 +1,53 @@
+name: yuda back CI CD
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get Code 
+      uses: actions/checkout@v3
+
+    - name: login azure
+      run: az login --user "${{secrets.AZURE_LOGIN_ID}}" --password "${{secrets.AZURE_LOGIN_PW}}"
+
+    - name: build dockers
+      run: docker build --platform=linux/amd64 \
+          --build-arg POSTGRES_HOSTPORT="${{ secrets.POSTGRES_HOSTPORT }}" \
+          --build-arg POSTGRES_HOST="${{ secrets.POSTGRES_HOST }}" \
+          --build-arg POSTGRES_PORT="${{ secrets.POSTGRES_PORT }}" \
+          --build-arg POSTGRES_USERNAME="${{ secrets.POSTGRES_USERNAME }}" \
+          --build-arg POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
+          --build-arg POSTGRES_DATABASE="${{ secrets.POSTGRES_DATABASE }}" \
+          --build-arg POSTGRES_SYNCHRONIZE="${{ secrets.POSTGRES_SYNCHRONIZE }}" \
+          --build-arg JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
+          --build-arg JWT_EXPIRES_ACCESS="${{ secrets.JWT_EXPIRES_ACCESS }}" \
+          -t yusushin/docker-backend ./back
+
+    - name: authorizate ACR and login to ACR
+      run: | 
+        az acr update -n fronttest --admin-enabled true
+        az acr login --name fronttest
+
+    - name: clean ACR repository 
+      run: |
+        az acr repository delete -n fronttest --repository yudaback --yes
+
+    - name: tag ACR name
+      run: | 
+        docker tag yusushin/docker-backend fronttest.azurecr.io/yudaback:${{ github.sha }} 
+
+    - name: push the dockers to ACR
+      run: | 
+        docker push fronttest.azurecr.io/yudaback:${{ github.sha }}  
+
+    - name: Deploy to Azure back Web App
+      id: deploy-back-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: yudabacktest
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACK }}
+        images: 'fronttest.azurecr.io/yudaback:${{ github.sha }}'
