@@ -32,7 +32,7 @@ jobs:
           --build-arg POSTGRES_SYNCHRONIZE="${{ secrets.POSTGRES_SYNCHRONIZE }}" \
           --build-arg JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
           --build-arg JWT_EXPIRES_ACCESS="${{ secrets.JWT_EXPIRES_ACCESS }}" \
-          -t yusushin/docker-backend ./back
+          -t yusushin/docker-backend:latest  ./back
 
     - name: authorizate ACR and login to ACR
       run: | 
@@ -45,7 +45,7 @@ jobs:
 
     - name: tag ACR name
       run: | 
-        docker tag yusushin/docker-backend fronttest.azurecr.io/yudaback:${{ github.sha }} 
+        docker tag yusushin/docker-backend:latest fronttest.azurecr.io/yudaback:${{ github.sha }} 
 
     - name: push the dockers to ACR
       run: | 
