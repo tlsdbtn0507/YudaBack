@@ -39,9 +39,9 @@ jobs:
         az acr update -n fronttest --admin-enabled true
         az acr login --name fronttest
 
-    - name: clean ACR repository 
-      run: |
-        az acr repository delete -n fronttest --repository yudaback --yes
+    # - name: clean ACR repository 
+    #   run: |
+    #     az acr repository delete -n fronttest --repository yudaback --yes
 
     - name: tag ACR name
       run: | 
