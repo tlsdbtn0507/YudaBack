@@ -5,7 +5,7 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: true,
+      origin: process.env.NODE_ENV === 'development' ? true : 'https://tlsdbtn0507.github.io/yuda.github.io',
       credentials: true,
     }
   });

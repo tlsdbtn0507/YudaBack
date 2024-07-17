@@ -62,7 +62,7 @@ export class UserController {
         secure: true,
       });
 
-      return res.json(result);
+      return result;
     } catch (error) {
       console.error('Error renewing token:', error);
       return res.status(500).json({ message: 'Internal Server Error' });

@@ -68,6 +68,8 @@ export class UserService {
       name: checkToken.name
     });
 
+    if(!accessToken) throw new UnauthorizedException('invalid jwt')
+
     return { accessToken };
   };
 
