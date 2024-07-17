@@ -47,6 +47,8 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Body() token: { refreshToken: string }
   ) {
+    if (!user) console.log('쿠키 문제');
+    
     const result = await this.userService.renewToken(token, user);
 
     res.cookie('Auth', result.accessToken, {
