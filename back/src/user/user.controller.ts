@@ -47,19 +47,26 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Body() token: { refreshToken: string }
   ) {
-    console.log('실행됨')
-    if (!user) console.log('쿠키 문제');
-    
-    const result = await this.userService.renewToken(token, user);
+    try {
+      if (!user) {
+        console.log('쿠키 문제');
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
 
-    res.cookie('Auth', result.accessToken, {
-      maxAge: +process.env.JWT_EXPIRES_ACCESS,
-      httpOnly: true,
-      sameSite:'none',
-      secure: true
-    });
+      const result = await this.userService.renewToken(token, user);
 
-    return result;
+      res.cookie('Auth', result.accessToken, {
+        maxAge: +process.env.JWT_EXPIRES_ACCESS,
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+      });
+
+      return res.json(result);
+    } catch (error) {
+      console.error('Error renewing token:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
   }
 
   @Post('/logout')
