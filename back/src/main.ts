@@ -7,7 +7,7 @@ import { log } from 'console';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: process.env.NODE_ENV ? true : 'https://tlsdbtn0507.github.io/yuda.github.io',
+      origin: process.env.FRONT_URL,
       credentials: true,
     }
   });
