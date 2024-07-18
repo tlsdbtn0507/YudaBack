@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DiaryEntity } from './diary.entity';
 import { LessThan, Repository } from 'typeorm';
@@ -11,6 +11,8 @@ export class DiaryService {
     @InjectRepository(DiaryEntity)
     private diaryService : Repository<DiaryEntity>
   ) { }
+  private readonly logger = new Logger(DiaryService.name);
+
   
   async createDiary(createDiaryDTO:CreateDiaryDTO,user:UserEntity) {
     const diary = this.diaryService.create({ ...createDiaryDTO, user });
@@ -20,7 +22,9 @@ export class DiaryService {
     return diary
   }
 
-  async getDiaries(user:UserEntity) {
+  async getDiaries(user: UserEntity) {
+    this.logger.log(`Fetching diaries for user: ${user.id}`);
+
     const diaries = await this.diaryService.find({
       where: { user },
       order: {

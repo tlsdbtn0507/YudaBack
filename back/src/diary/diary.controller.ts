@@ -22,11 +22,19 @@ export class DiaryController {
 
   @Get()
   getDiaries(@GetUser() user: UserEntity) {
-    return this.diaryService.getDiaries(user);
+    try {
+      return this.diaryService.getDiaries(user);
+    } catch (error) {
+      throw new Error('Could not fetch diaries');
+    }
   }
 
   @Get('/:id')
   getMoreDiaries(@GetUser() user: UserEntity, @Param('id') id: number) {
-    return this.diaryService.getMoreDiaries(user,id)
+    try {
+      return this.diaryService.getMoreDiaries(user,id)
+    } catch (error) {
+      
+    }
   }
 }
