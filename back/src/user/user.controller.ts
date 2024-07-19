@@ -7,6 +7,16 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/configs/get-user.decorator';
 import { UserEntity } from './user.entity';
 
+const setCookie = (res: Response,name: string, value: string) => {
+  res.cookie(name,value, {
+    maxAge: +process.env.JWT_EXPIRES_ACCESS,
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+    domain: process.env.BACK_DOMAIN,
+  })
+};
+
 @Controller('/api/user')
 export class UserController {
   constructor(private userService: UserService) { }
@@ -30,12 +40,7 @@ export class UserController {
     
     const { accessToken } = await this.userService.login(signUserDto);
 
-    res.cookie('Auth', accessToken, {
-      maxAge:+process.env.JWT_EXPIRES_ACCESS,
-      httpOnly: true,
-      sameSite:'none',
-      secure: true
-    })
+    setCookie(res,'Auth',accessToken)
 
     return this.userService.login(signUserDto);
   }
@@ -47,26 +52,12 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Body() token: { refreshToken: string }
   ) {
-    try {
-      if (!user) {
-        console.log('쿠키 문제');
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
 
       const result = await this.userService.renewToken(token, user);
 
-      res.cookie('Auth', result.accessToken, {
-        maxAge: +process.env.JWT_EXPIRES_ACCESS,
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true,
-      });
+      setCookie(res, 'Auth', result.accessToken);
 
       return result;
-    } catch (error) {
-      console.error('Error renewing token:', error);
-      return res.status(500).json({ message: 'Internal Server Error' });
-    }
   }
 
   @Post('/logout')

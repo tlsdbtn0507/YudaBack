@@ -32,6 +32,7 @@ jobs:
           --build-arg POSTGRES_SYNCHRONIZE="${{ secrets.POSTGRES_SYNCHRONIZE }}" \
           --build-arg JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
           --build-arg JWT_EXPIRES_ACCESS="${{ secrets.JWT_EXPIRES_ACCESS }}" \
+          --build-arg BACK_DOMAIN="${{ secrets.BACK_DOMAIN }}" \
           --build-arg CUR_VERSION="${{ github.sha }}" \
           -t yusushin/docker-backend:latest  ./back
 
