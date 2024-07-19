@@ -33,6 +33,7 @@ jobs:
           --build-arg JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
           --build-arg JWT_EXPIRES_ACCESS="${{ secrets.JWT_EXPIRES_ACCESS }}" \
           --build-arg BACK_DOMAIN="${{ secrets.BACK_DOMAIN }}" \
+          --build-arg FRONT_URL="${{ secrets.FRONT_URL }}" \
           --build-arg CUR_VERSION="${{ github.sha }}" \
           -t yusushin/docker-backend:latest  ./back
 

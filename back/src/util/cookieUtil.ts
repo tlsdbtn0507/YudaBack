@@ -21,7 +21,7 @@ const setCookie = (
     httpOnly: options.httpOnly !== undefined ? options.httpOnly : true,
     secure: options.secure !== undefined ? options.secure : true,
     sameSite: options.sameSite || 'none',
-    domain: options.domain || process.env.BACK_DOMAIN, 
+    domain: options.domain || process.env.FRONT_URL, 
     path: options.path || '/', 
   });
 };
