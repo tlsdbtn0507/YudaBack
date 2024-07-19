@@ -6,16 +6,7 @@ import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/configs/get-user.decorator';
 import { UserEntity } from './user.entity';
-
-const setCookie = (res: Response,name: string, value: string) => {
-  res.cookie(name,value, {
-    maxAge: +process.env.JWT_EXPIRES_ACCESS,
-    httpOnly: true,
-    sameSite: 'none',
-    secure: true,
-    domain: process.env.BACK_DOMAIN,
-  })
-};
+import setCookie from 'src/util/cookieUtil';
 
 @Controller('/api/user')
 export class UserController {
