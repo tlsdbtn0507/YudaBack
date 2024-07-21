@@ -32,6 +32,7 @@ export class UserController {
     const { accessToken } = await this.userService.login(signUserDto);
 
     setCookie(res, 'Auth', accessToken);
+    res.setHeader('Authorization', `Bearer ${accessToken}`);
 
     return this.userService.login(signUserDto);
   }
