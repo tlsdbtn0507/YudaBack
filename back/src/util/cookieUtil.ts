@@ -18,8 +18,9 @@ const setCookie = (
 ) => {
   
   const cookieOptions:CookieOptions = {
-    maxAge: options.maxAge || +process.env.JWT_EXPIRES_ACCESS, 
-    httpOnly: options.httpOnly !== undefined ? options.httpOnly : true,
+    maxAge: +process.env.JWT_EXPIRES_ACCESS,
+    httpOnly: true,
+    secure: !!process.env.COOKIE_SECURE,
   }
   res.cookie(name, value, cookieOptions);
 };
