@@ -1,8 +1,8 @@
-import { Body, Controller, Post, UsePipes, ValidationPipe, Res, UseGuards} from '@nestjs/common';
+import { Body, Controller, Post, UsePipes, ValidationPipe, Res, UseGuards, Req} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUser.Dto';
 import { SignUserDto } from './dto/signUserDto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/configs/get-user.decorator';
 import { UserEntity } from './user.entity';
@@ -31,7 +31,7 @@ export class UserController {
     
     const { accessToken } = await this.userService.login(signUserDto);
 
-    setCookie(res, 'Auth', accessToken);
+    setCookie(res, 'refreshToken', accessToken);
     res.setHeader('Authorization', `Bearer ${accessToken}`);
 
     return this.userService.login(signUserDto);
@@ -47,7 +47,7 @@ export class UserController {
 
       const result = await this.userService.renewToken(token, user);
 
-      setCookie(res, 'Auth', result.accessToken);
+      setCookie(res, 'refreshToken', result.accessToken);
 
       return result;
   }
@@ -57,11 +57,21 @@ export class UserController {
   async logout(
     @GetUser() user: UserEntity,
     @Res({ passthrough: true }) res: Response,
-    @Body() token: { refreshToken: string }
+    @Req() req : Request
   ) {
+    const token = req.cookies['refreshToken'];
     const result = await this.userService.logout(token, user);
-    result && res.cookie('Auth', null, { maxAge: 0 });
-    return result
+
+    if (!token) {
+      return res.status(400).send({ message: 'No refresh token provided' });
+    }
+    
+    if (result) {
+      res.clearCookie('refreshToken');
+      res.status(200).send({ message: 'Logout successful' });
+    } else {
+      res.status(401).send({ message: 'Logout failed' });
+    }
   }
 
 }

@@ -5,26 +5,42 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { UserEntity } from "src/user/user.entity";
 import { Request } from "express";
 import { Repository } from "typeorm";
+import { UserService } from "src/user/user.service";
 
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy){
   constructor(
     @InjectRepository(UserEntity)
-    private userService: Repository<UserEntity>,
+    private userEntityService: Repository<UserEntity>,
+    private userService: UserService
   ) {
     super(
       {
         secretOrKey: process.env.JWT_SECRET_KEY,
         ignoreExpiration:false,
-        jwtFromRequest: ExtractJwt.fromExtractors([(req:Request) => req.cookies['Auth']])
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       })
      }
-  async validate(payload) {
+  async validate(payload: any, req: Request) {
     const { id } = payload;
-    const user: UserEntity = await this.userService.findOne({ where: { userId:id } });
+    const user: UserEntity = await this.userEntityService.findOne({ where: { userId:id } });
     
-    if (!user) throw new UnauthorizedException();
-    return user
+    if (!user) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    const [_, accessToken] = req.headers.authorization?.split(' ');
+
+    if (!accessToken) {
+      const refreshToken = req.cookies['refreshToken'];
+      if (!refreshToken) {
+        throw new UnauthorizedException('재 로그인 필요');
+      }
+      const newAccessToken = await this.userService.refreshAccessToken(refreshToken);
+      
+      req.headers.authorization = `Bearer ${newAccessToken}`;
+    }
+    return user;
   }
 }
