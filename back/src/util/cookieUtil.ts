@@ -20,7 +20,8 @@ const setCookie = (
   const cookieOptions:CookieOptions = {
     maxAge: +process.env.JWT_EXPIRES_ACCESS,
     httpOnly: true,
-    secure: !!process.env.COOKIE_SECURE,
+    secure: process.env.NODE_ENV !== 'development',
+    sameSite: process.env.COOKIE_SAMESITE as CookieOptions['sameSite'],
   }
   res.cookie(name, value, cookieOptions);
 };
