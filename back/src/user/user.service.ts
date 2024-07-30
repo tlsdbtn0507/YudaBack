@@ -49,7 +49,7 @@ export class UserService {
       });
       const accessToken = this.jwtService.sign(payload);
 
-      await this.userService.update({ id: getUser.id }, { refreshToken });
+      const result = await this.userService.update({ id: getUser.id }, { refreshToken });
 
       return { accessToken,refreshToken };
     }
@@ -73,11 +73,30 @@ export class UserService {
     return { accessToken };
   };
 
-  async logout(token:{refreshToken:string}, user:UserEntity) {
-    const { refreshToken } = token;
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const { id, refreshToken: isValidRefToken, name } =
+        await this.userService.findOne({ where: { refreshToken } });
+      if (!isValidRefToken || refreshToken !== isValidRefToken) {
+        throw new UnauthorizedException('재로그인 필요');
+      };
+      const newAccessToken = this.jwtService.sign({ id, name });
+      return newAccessToken;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async logout(refreshToken:string) {
     const checkToken = await this.userService.findOne({ where: { refreshToken } });
-    await this.userService.update({ id: checkToken.id }, { refreshToken: null });
-    return checkToken.id === user.id;
+
+    console.log('서비스에서 걸림')
+    if (checkToken) {
+      await this.userService.update({ id: checkToken.id }, { refreshToken: null });
+      return true
+    }
+
+    return false
   }
 
 }

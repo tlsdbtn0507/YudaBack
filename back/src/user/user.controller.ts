@@ -29,38 +29,36 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Body() signUserDto: SignUserDto) {
     
-    const { accessToken } = await this.userService.login(signUserDto);
+    const { accessToken, refreshToken } = await this.userService.login(signUserDto);
 
-    setCookie(res, 'refreshToken', accessToken);
+    setCookie(res, 'refreshToken', refreshToken);
     res.setHeader('Authorization', `Bearer ${accessToken}`);
 
     return this.userService.login(signUserDto);
   }
 
   @Post('/renew')
-  @UseGuards(AuthGuard())
   async renewToken(
-    @GetUser() user: UserEntity,
-    @Res({ passthrough: true }) res: Response,
-    @Body() token: { refreshToken: string }
-  ) {
-
-      const result = await this.userService.renewToken(token, user);
-
-      setCookie(res, 'refreshToken', result.accessToken);
-
-      return result;
-  }
-
-  @Post('/logout')
-  @UseGuards(AuthGuard())
-  async logout(
-    @GetUser() user: UserEntity,
     @Res({ passthrough: true }) res: Response,
     @Req() req : Request
   ) {
     const token = req.cookies['refreshToken'];
-    const result = await this.userService.logout(token, user);
+    if (!token) return res.status(501).send({ message: '새로 로그인 해야함' });
+    
+    const result = await this.userService.refreshAccessToken(token)
+    
+    setCookie(res, 'refreshToken', result);
+    
+    return result;
+  }
+
+  @Post('/logout')
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req : Request
+  ) {
+    const token = req.cookies['refreshToken'];
+    const result = await this.userService.logout(token);
 
     if (!token) {
       return res.status(400).send({ message: 'No refresh token provided' });

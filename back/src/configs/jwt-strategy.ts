@@ -23,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
       })
      }
   async validate(payload: any, req: Request) {
+    console.log(payload,req,'valid에서 걸림')
     const { id } = payload;
     const user: UserEntity = await this.userEntityService.findOne({ where: { userId:id } });
     
