@@ -23,24 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy){
       })
      }
   async validate(payload: any, req: Request) {
-    console.log(payload,req,'valid에서 걸림')
     const { id } = payload;
     const user: UserEntity = await this.userEntityService.findOne({ where: { userId:id } });
     
     if (!user) {
       throw new UnauthorizedException('Invalid token');
-    }
-
-    const [_, accessToken] = req.headers.authorization?.split(' ');
-
-    if (!accessToken) {
-      const refreshToken = req.cookies['refreshToken'];
-      if (!refreshToken) {
-        throw new UnauthorizedException('재 로그인 필요');
-      }
-      const newAccessToken = await this.userService.refreshAccessToken(refreshToken);
-      
-      req.headers.authorization = `Bearer ${newAccessToken}`;
     }
     return user;
   }

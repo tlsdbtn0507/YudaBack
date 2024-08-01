@@ -47,9 +47,9 @@ export class UserController {
     
     const result = await this.userService.refreshAccessToken(token)
     
-    setCookie(res, 'refreshToken', result);
+    setCookie(res, 'refreshToken', token);
     
-    return result;
+    return { accessToken: result };
   }
 
   @Post('/logout')
@@ -63,7 +63,6 @@ export class UserController {
     if (!token) {
       return res.status(400).send({ message: 'No refresh token provided' });
     }
-    
     if (result) {
       res.clearCookie('refreshToken');
       res.status(200).send({ message: 'Logout successful' });

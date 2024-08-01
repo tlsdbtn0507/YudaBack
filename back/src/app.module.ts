@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
 import { ConfigModule } from '@nestjs/config';
 import { DiaryModule } from './diary/diary.module';
+import { RefreshTokenMiddleWare } from './configs/refreshMiddleWare';
 
 @Module({
   imports: [
@@ -22,4 +23,11 @@ import { DiaryModule } from './diary/diary.module';
   providers: [AppService],
 })
   
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RefreshTokenMiddleWare).forRoutes(
+      { path: 'api/user/logout', method: RequestMethod.ALL },
+      { path: 'api/diary', method: RequestMethod.ALL },
+    );
+  };
+}
