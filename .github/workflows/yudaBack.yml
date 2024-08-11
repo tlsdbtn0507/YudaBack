@@ -39,9 +39,9 @@ jobs:
           --build-arg JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
           --build-arg JWT_EXPIRES_ACCESS="${{ secrets.JWT_EXPIRES_ACCESS }}" \
           --build-arg JWT_EXPIRES_REFRESH="${{ secrets.JWT_EXPIRES_REFRESH }}" \
-          --build-arg BACK_DOMAIN="${{ secrets.BACK_DOMAIN }}" \
           --build-arg FRONT_URL="${{ secrets.FRONT_URL }}" \
           --build-arg COOKIE_SAMESITE="${{ secrets.COOKIE_SAMESITE }}" \
+          --build-arg COOKIE_DOMAIN="${{ secrets.COOKIE_DOMAIN }}" \
           --build-arg CUR_VERSION="${{ github.sha }}" \
           -t yusushin/docker-backend:latest  ./back
 

@@ -22,7 +22,7 @@ const setCookie = (
     httpOnly: true,
     secure: process.env.NODE_ENV !== 'development',
     sameSite: process.env.COOKIE_SAMESITE as CookieOptions['sameSite'],
-    domain:process.env.FRONT_URL
+    domain:process.env.COOKIE_DOMAIN
   }
   res.cookie(name, value, cookieOptions);
 };
