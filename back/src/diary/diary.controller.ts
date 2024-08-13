@@ -1,12 +1,12 @@
-import { Body, Controller, Post, UseGuards, UsePipes, ValidationPipe,Get, Param, Req } from '@nestjs/common';
+import { Body, Controller, Post, UsePipes, ValidationPipe,Get, Param, UseGuards } from '@nestjs/common';
 import { DiaryService } from './diary.service';
 import { CreateDiaryDTO } from './dto/createDiary.dto';
-import { GetUser } from 'src/configs/get-user.decorator';
 import { UserEntity } from 'src/user/user.entity';
-import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/configs/get-user.decorator';
+import { JwtAuthGuard } from 'src/configs/JwtAuthGuard';
 
 @Controller('/api/diary')
-@UseGuards(AuthGuard())
+@UseGuards(JwtAuthGuard)
 export class DiaryController {
   constructor(private diaryService: DiaryService) { }
   
@@ -21,7 +21,9 @@ export class DiaryController {
   }
 
   @Get()
-  getDiaries(@GetUser() user: UserEntity) {
+  getDiaries(
+    @GetUser() user: UserEntity
+  ) {
     try {
       return this.diaryService.getDiaries(user);
     } catch (error) {
@@ -30,7 +32,9 @@ export class DiaryController {
   }
 
   @Get('/:id')
-  getMoreDiaries(@GetUser() user: UserEntity, @Param('id') id: number) {
+  getMoreDiaries(
+    @GetUser() user: UserEntity, @Param('id') id: number
+  ) {
     try {
       return this.diaryService.getMoreDiaries(user,id)
     } catch (error) {
