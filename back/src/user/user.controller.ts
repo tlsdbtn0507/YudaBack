@@ -1,11 +1,8 @@
-import { Body, Controller, Post, UsePipes, ValidationPipe, Res, UseGuards, Req} from '@nestjs/common';
+import { Body, Controller, Post, UsePipes, ValidationPipe, Res, Req} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUser.Dto';
 import { SignUserDto } from './dto/signUserDto';
 import { Request, Response } from 'express';
-import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/configs/get-user.decorator';
-import { UserEntity } from './user.entity';
 import setCookie from 'src/util/cookieUtil';
 
 @Controller('/api/user')
@@ -65,9 +62,9 @@ export class UserController {
     }
     if (result) {
       res.clearCookie('refreshToken');
-      res.status(200).send({ message: 'Logout successful' });
+      res.status(200).send({ message: 'Logout successful', result: true });
     } else {
-      res.status(401).send({ message: 'Logout failed' });
+      res.status(401).send({ message: 'Logout failed', result: false });
     }
   }
 
