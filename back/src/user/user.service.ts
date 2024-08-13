@@ -42,14 +42,14 @@ export class UserService {
     const getUser = await this.userService.findOne({ where: { userId:id } });
 
     if (getUser && (await bcrypt.compare(pw, getUser.pw))) {
-      const payload = { id, name: getUser.name };
+      const payload = { nickName:id, name: getUser.name };
       
       const refreshToken = this.jwtService.sign({
-       id, expiresIn: process.env.JWT_EXPIRES_ACCESS
+        nickName: id, expiresIn: process.env.JWT_EXPIRES_ACCESS
       });
       const accessToken = this.jwtService.sign(payload);
 
-      const result = await this.userService.update({ id: getUser.id }, { refreshToken });
+      await this.userService.update({ id: getUser.id }, { refreshToken });
 
       return { accessToken,refreshToken };
     }
@@ -64,7 +64,7 @@ export class UserService {
     if (checkToken.id !== user.id) throw new UnauthorizedException('로그인 유지 불가');
 
     const accessToken = this.jwtService.sign({
-      id: checkToken.userId,
+      nickName: checkToken.userId,
       name: checkToken.name
     });
 
@@ -82,7 +82,7 @@ export class UserService {
         throw new UnauthorizedException('재로그인 필요');
       };
 
-      const newAccessToken = this.jwtService.sign({ id, name });
+      const newAccessToken = this.jwtService.sign({ nickName: id, name });
 
       return newAccessToken;
     } catch (error) {
@@ -99,6 +99,10 @@ export class UserService {
     }
 
     return false
+  }
+
+  async findUserById(userId:string):Promise<UserEntity | null> {
+    return await this.userService.findOne({ where: { userId } });
   }
 
 }
