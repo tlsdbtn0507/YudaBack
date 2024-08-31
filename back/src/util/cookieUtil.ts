@@ -20,7 +20,7 @@ const setCookie = (
   const cookieOptions:CookieOptions = {
     maxAge: +process.env.JWT_EXPIRES_REFRESH,
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV !== 'development',
     sameSite: process.env.COOKIE_SAMESITE as CookieOptions['sameSite'],
     domain:process.env.COOKIE_DOMAIN
   }
