@@ -24,6 +24,12 @@ const setCookie = (
     sameSite: process.env.COOKIE_SAMESITE as CookieOptions['sameSite'],
     domain:process.env.COOKIE_DOMAIN
   }
+  if (cookieOptions.domain === 'undefined') {
+    delete cookieOptions.domain;
+  }
+
+  console.log(cookieOptions)
+
   res.cookie(name, value, cookieOptions);
 };
 

@@ -29,7 +29,6 @@ export class UserController {
     const { accessToken, refreshToken } = await this.userService.login(signUserDto);
 
     setCookie(res, 'refreshToken', refreshToken);
-    res.setHeader('Authorization', `Bearer ${accessToken}`);
 
     return this.userService.login(signUserDto);
   }

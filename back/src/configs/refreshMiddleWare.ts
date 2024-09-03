@@ -23,8 +23,6 @@ export class RefreshTokenMiddleWare implements NestMiddleware {
       }
       const newAccessToken = await this.userService.refreshAccessToken(refreshToken);
       
-      res.setHeader('Authorization', `Bearer ${newAccessToken}`);
-
     }
     next();
   };
