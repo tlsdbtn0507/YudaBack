@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DiaryEntity } from './diary.entity';
 import { LessThan, Repository } from 'typeorm';
-import { CreateDiaryDTO } from './dto/createDiary.dto';
+import { WriteDiaryDTO } from './dto/writeDiary.dto';
 import { UserEntity } from 'src/user/user.entity';
 
 @Injectable()
@@ -14,8 +14,8 @@ export class DiaryService {
   private readonly logger = new Logger(DiaryService.name);
 
   
-  async createDiary(createDiaryDTO:CreateDiaryDTO,user:UserEntity) {
-    const diary = this.diaryService.create({ ...createDiaryDTO, user });
+  async writeDiary(writeDiaryDTO:WriteDiaryDTO,user:UserEntity) {
+    const diary = this.diaryService.create({ ...writeDiaryDTO, user });
     
     await this.diaryService.save(diary)
 
