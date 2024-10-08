@@ -17,6 +17,7 @@ export class DiaryController {
     @Body() writeDiaryDTO: WriteDiaryDTO,
     @GetUser() user : UserEntity
   ) {
+    console.log(user);
     return this.diaryService.writeDiary(writeDiaryDTO, user);
   }
 
