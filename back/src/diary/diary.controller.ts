@@ -17,8 +17,9 @@ export class DiaryController {
     @Body() writeDiaryDTO: WriteDiaryDTO,
     @GetUser() user : UserEntity
   ) {
-    console.log(user);
-    return this.diaryService.writeDiary(writeDiaryDTO, user);
+    const { lat, long, diaryDate } = writeDiaryDTO;
+    this.diaryService.getRealWeather(lat, long,diaryDate);
+    // return this.diaryService.writeDiary(writeDiaryDTO, user);
   }
 
   @Get()
