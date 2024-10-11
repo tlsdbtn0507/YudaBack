@@ -6,7 +6,6 @@ import { WriteDiaryDTO } from './dto/writeDiary.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { time } from 'console';
 
 @Injectable()
 export class DiaryService {
@@ -27,26 +26,36 @@ export class DiaryService {
   };
 
   async getRealWeather(lat: number, long: number, diaryDate: string) {
-    const localDate = new Date().toLocaleTimeString('ko-KR', {
+    const [hour, min] = new Date().toLocaleTimeString('ko-KR', {
       timeZone: 'Asia/Seoul',
       hour12:false
-    });
+    }).split(' ');
 
-    const [h, m] = localDate.split(' ');
-    const min = m.slice(0, 2);
-    console.log(min)
-    const hour = +min <=10 ? +h.replace('시', '00')-1 : +h.replace('시', '00');
-
-    const [x] = `${lat}`.split('.')
-    const [y] = `${long}`.split('.')
-
-    const { data: { response: { body: { items } } } } =
-      await lastValueFrom(this.httpService.get(
-      process.env.WEATHER_URL + process.env.WEATHER_KEY +
-      '&base_date=' + diaryDate.replaceAll('-', '') + '&base_time=' + hour
-      + '&nx=' + x + '&ny=' + y));
+    const base_time = + min.slice(0, 2) <= 10 ?
+      +hour.replace('시', '00') - 1 :
+      +hour.replace('시', '00');
     
-    console.log(items);
+    const base_date = diaryDate.replaceAll('-', '');
+
+    const cordMaker = (num: number) => `${num}`.split('.')[0];
+
+    try {
+      const { data: { response: { body: { items } } } } =
+        await lastValueFrom(this.httpService.get(
+          process.env.WEATHER_URL +
+          process.env.WEATHER_KEY +
+          `&base_date=${base_date}`+
+          `&base_time=${base_time}`+
+          `&nx=${cordMaker(lat)}&ny=${cordMaker(long)}`
+        ));
+      console.log(items);
+    } catch (error) {
+      
+    }
+
+
+    
+    
   };
 
 
