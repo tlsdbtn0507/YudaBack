@@ -6,6 +6,7 @@ import { DiaryEntity } from './diary.entity';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
+import { CoordsModule } from 'src/coords/coords.module';
 
 
 @Module({
@@ -13,7 +14,8 @@ import { HttpModule } from '@nestjs/axios';
     TypeOrmModule.forFeature([DiaryEntity]),
     UserModule,
     JwtModule.register({ secret: process.env.JWT_SECRET_KEY }),
-    HttpModule
+    HttpModule,
+    CoordsModule
   ],
   controllers: [DiaryController],
   providers: [DiaryService]

@@ -6,13 +6,16 @@ import { WriteDiaryDTO } from './dto/writeDiary.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { CoordService } from 'src/coords/coords.service';
+
 
 @Injectable()
 export class DiaryService {
   constructor(
     @InjectRepository(DiaryEntity)
     private diaryService: Repository<DiaryEntity>,
-    private readonly httpService : HttpService
+    private readonly httpService: HttpService,
+    private readonly coordService: CoordService
   ) { }
   private readonly logger = new Logger(DiaryService.name);
 
@@ -25,7 +28,7 @@ export class DiaryService {
     return diary
   };
 
-  async getRealWeather(lat: number, long: number, diaryDate: string) {
+  async getRealWeather(lat: string, long: string, diaryDate: string) {
     const [hour, min] = new Date().toLocaleTimeString('ko-KR', {
       timeZone: 'Asia/Seoul',
       hour12:false
@@ -33,12 +36,12 @@ export class DiaryService {
 
     const base_time = + min.slice(0, 2) <= 10 ?
       +hour.replace('시', '00') - 1 :
-      +hour.replace('시', '00');
+      +hour.replace('시', min.slice(0, 2));
     
     const base_date = diaryDate.replaceAll('-', '');
 
-    const cordMaker = (num: number) => `${num}`.split('.')[0];
-
+    const { x, y } = this.coordService.convertToGrid(lat, long);
+    console.log(x,y)
     try {
       const { data: { response: { body: { items } } } } =
         await lastValueFrom(this.httpService.get(
@@ -46,9 +49,9 @@ export class DiaryService {
           process.env.WEATHER_KEY +
           `&base_date=${base_date}`+
           `&base_time=${base_time}`+
-          `&nx=${cordMaker(lat)}&ny=${cordMaker(long)}`
+          `&nx=${x}&ny=${y}`
         ));
-      console.log(items);
+      return { x, y, items };
     } catch (error) {
       
     }
