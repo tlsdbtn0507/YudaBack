@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsObject, IsString, Matches, MaxLength } from "class-validator";
+import { IsNotEmpty, isNumber, IsNumber, IsObject, IsOptional, IsString, Matches, MaxLength } from "class-validator";
 import { Days } from "src/configs/weathers.model";
 
 export class WriteDiaryDTO {
@@ -31,14 +31,18 @@ export class WriteDiaryDTO {
   })
   diaryDate: string;
 
-  @Matches(/^(-?\d+(\.\d{1,4})?)$/, {
-    message: 'Latitude must be a number with up to 4 decimal places',
-  })
-  lat: number;
+  // @Matches(/^(-?\d+(\.\d{1,6})?)$/, {
+  //   message: 'Latitude must be a number with up to 6 decimal places',
+  // })
+  // @IsFlo()
+  //   @IsOptional()
+  lat: string;
 
-  @Matches(/^(-?\d+(\.\d{1,4})?)$/, {
-    message: 'Longitude must be a number with up to 4 decimal places',
-  })
-  long: number;
+  // @Matches(/^(-?\d+(\.\d{1,6})?)$/, {
+  //   message: 'Longitude must be a number with up to 6 decimal places',
+  // })
+  // @IsNumber()
+  //   @IsOptional()
+  long: string;
 
 }

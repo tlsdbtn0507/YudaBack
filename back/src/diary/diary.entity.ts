@@ -28,11 +28,11 @@ export class DiaryEntity extends BaseEntity{
   @Column({ type: 'date' }) // 날짜 형식은 date 타입
   diaryDate: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 4, nullable: true }) // 위도 소수점 4자리까지
-  lat: number;
+  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true }) // 위도 소수점 4자리까지
+  lat: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 4, nullable: true }) // 경도 소수점 4자리까지
-  long: number;
+  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true }) // 경도 소수점 4자리까지
+  long: string;
 
   @ManyToOne(type => UserEntity, user => user.diary, { eager: false })
   user:UserEntity
