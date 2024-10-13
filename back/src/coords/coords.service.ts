@@ -1,8 +1,19 @@
 import { Injectable } from '@nestjs/common';
 
+type WeatherResultObj = {
+  baseDate:string,
+  baseTime:string,
+  category:string,
+  nx: number,
+  ny: number,
+  obsrValue: string
+}
+
 @Injectable()
 export class CoordService {
-  constructor() {}
+  constructor() { }
+  
+
 
   // Lambert 변환 함수
   lambertProjection(lon: number, lat: number, map: any, code: number) {
@@ -71,5 +82,15 @@ export class CoordService {
     // Lambert 변환 호출
     const gridCoords = this.lambertProjection(parseFloat(lon), parseFloat(latitude), map, 0);
     return gridCoords;
+  };
+
+  filterWeather(arr:WeatherResultObj[]) {
+    return arr.map(e => {
+      if (e.category === 'PTY') {
+        
+      }
+    })
   }
+
+
 }
