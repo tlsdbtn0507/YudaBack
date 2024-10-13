@@ -84,12 +84,16 @@ export class CoordService {
     return gridCoords;
   };
 
-  filterWeather(arr:WeatherResultObj[]) {
-    return arr.map(e => {
-      if (e.category === 'PTY') {
-        
-      }
-    })
+  filterWeatherValues(arr: WeatherResultObj[]): { [key: string]: string } {
+    const result: { [key: string]: string } = {};
+
+    arr.forEach(e => {
+      if (e.category === 'PTY') result.rainCod = e.obsrValue;
+      if (e.category === 'T1H') result.temp = e.obsrValue;
+      if (e.category === 'RN1') result.rainAmount = e.obsrValue;
+      if (e.category === 'REH') result.humidity = e.obsrValue;
+    });``
+    return result;
   }
 
 

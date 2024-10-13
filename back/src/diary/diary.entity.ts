@@ -34,6 +34,18 @@ export class DiaryEntity extends BaseEntity{
   @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true }) // 경도 소수점 4자리까지
   long: string;
 
+  @Column({ nullable: true })
+  rainCod: string;
+
+  @Column({ nullable: true })
+  temp: string;
+
+  @Column({ nullable: true })
+  rainAmount: string;
+
+  @Column({ nullable: true })
+  humidity: string;
+  
   @ManyToOne(type => UserEntity, user => user.diary, { eager: false })
   user:UserEntity
 
