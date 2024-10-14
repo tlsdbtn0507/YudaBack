@@ -15,7 +15,8 @@ services:
       - back/.env
     ports:
       - "3002:3002"
-    
+    command: npm run start:dev
+
   postgres:
     build: ./postgres
     restart: unless-stopped

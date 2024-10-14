@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UsePipes, ValidationPipe,Get, Param, UseGuards } from '@nestjs/common';
 import { DiaryService } from './diary.service';
-import { CreateDiaryDTO } from './dto/createDiary.dto';
+import { WriteDiaryDTO } from './dto/writeDiary.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { GetUser } from 'src/configs/get-user.decorator';
 import { JwtAuthGuard } from 'src/configs/JwtAuthGuard';
@@ -13,11 +13,11 @@ export class DiaryController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  createDiary(
-    @Body() createDiaryDTO: CreateDiaryDTO,
+  writeDiary(
+    @Body() writeDiaryDTO: WriteDiaryDTO,
     @GetUser() user : UserEntity
   ) {
-    return this.diaryService.createDiary(createDiaryDTO, user);
+    return this.diaryService.writeDiary(writeDiaryDTO, user);
   }
 
   @Get()

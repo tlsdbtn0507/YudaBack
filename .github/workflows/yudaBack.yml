@@ -42,6 +42,9 @@ jobs:
           --build-arg FRONT_URL="${{ secrets.FRONT_URL }}" \
           --build-arg COOKIE_SAMESITE="${{ secrets.COOKIE_SAMESITE }}" \
           --build-arg COOKIE_DOMAIN="${{ secrets.COOKIE_DOMAIN }}" \
+          --build-arg WEATHER_URL="${{ secrets.WEATHER_URL }}" \
+          --build-arg WEATHER_KEY="${{ secrets.WEATHER_KEY }}" \
+          --build-arg PROJ_KOREA="${{ secrets.PROJ_KOREA }}" \
           --build-arg CUR_VERSION="${{ github.sha }}" \
           -t yusushin/docker-backend:latest  ./back
 
