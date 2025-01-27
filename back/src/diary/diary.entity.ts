@@ -1,4 +1,4 @@
-import { Days, Weathers } from "src/configs/weathers.model";
+import { Days } from "src/types/weathers.model";
 import { UserEntity } from "src/user/user.entity";
 import {
   BaseEntity,

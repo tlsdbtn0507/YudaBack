@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsObject, Matches, MaxLength } from "class-validator";
-import { Days } from "src/configs/weathers.model";
+import { Days } from "src/types/weathers.model";
 
 export class WriteDiaryDTO {
   @IsObject()
