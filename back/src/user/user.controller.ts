@@ -26,11 +26,18 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Body() signUserDto: SignUserDto) {
     
-    const { accessToken, refreshToken } = await this.userService.login(signUserDto);
-
-    setCookie(res, 'refreshToken', refreshToken);
-
-    return this.userService.login(signUserDto);
+    try {
+      const { accessToken,refreshToken } = await this.userService.login(signUserDto);
+      setCookie(res, 'refreshToken', refreshToken);
+      res
+        .status(200)
+        .json({ message: "Login successful", result: true, accessToken });
+      return { accessToken };
+    } catch (error) {
+      return res
+        .status(400)
+        .json({ message: "Login fail", result: false });
+    }
   }
 
   @Post('/renew')
