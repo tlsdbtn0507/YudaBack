@@ -1,20 +1,23 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DiaryEntity } from './diary.entity';
-import { LessThan, Repository } from 'typeorm';
-import { WriteDiaryDTO } from './dto/writeDiary.dto';
-import { UserEntity } from 'src/user/user.entity';
-import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
-import { CoordService } from 'src/coords/coords.service';
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { DiaryEntity } from "./diary.entity";
+import { LessThan, Repository } from "typeorm";
+import { WriteDiaryDTO } from "./dto/writeDiary.dto";
+import { UserEntity } from "src/user/user.entity";
+import { HttpService } from "@nestjs/axios";
+import { lastValueFrom } from "rxjs";
+import { CoordService } from "src/coords/coords.service";
+import { makeWeatherURL } from "src/util/constantsUtil";
+import { baseTimeDateMaker } from "src/util/dateUtil";
+import { ErrorHandler } from "src/util/errorHandlers";
+import { UpdateDiaryDTO } from "./dto/updateDiary.dto";
 
 type WeatherData = {
-  rainCod:string,
-  temp:string,
-  rainAmount:string,
-  humidity:string,
-}
-
+  rainCod: string;
+  temp: string;
+  rainAmount: string;
+  humidity: string;
+};
 
 @Injectable()
 export class DiaryService {
@@ -23,96 +26,131 @@ export class DiaryService {
     private diaryService: Repository<DiaryEntity>,
     private readonly httpService: HttpService,
     private readonly coordService: CoordService
-  ) { }
+  ) {}
   private readonly logger = new Logger(DiaryService.name);
 
-  
+  async checkIsDiaryExist(
+    writeDiaryDTO: WriteDiaryDTO,
+    user: UserEntity
+  ): Promise<number | null> {
+    try {
+      const { id } = user;
+      const { diaryDate } = writeDiaryDTO;
+
+      const isDiaryExist = await this.diaryService.findOne({
+        where: {
+          user: { id },
+          diaryDate,
+        },
+      });
+
+      return isDiaryExist?.id || null;
+    } catch (error) {
+      throw new ErrorHandler("FETCH_DATA");
+    }
+  }
+
   async writeDiary(writeDiaryDTO: WriteDiaryDTO, user: UserEntity) {
-    const { lat, long, diaryDate } = writeDiaryDTO;
-    const realWeather = await this.getRealWeather(lat, long, diaryDate) as WeatherData;
-
-    let diary: DiaryEntity;
+    const realWeather = (await this.getRealWeather(
+      writeDiaryDTO.lat,
+      writeDiaryDTO.long,
+      writeDiaryDTO.diaryDate.replaceAll("-", "")
+    )) as WeatherData;
 
     try {
-      diary = this.diaryService.create({ ...writeDiaryDTO, ...realWeather, user });      
-    } catch (error) {
-      throw new HttpException(
-        'Failed to create diary entry. Please check the input data and try again.',
-        HttpStatus.BAD_REQUEST
-      );      
-    }
-    try {
+      const diary = this.diaryService.create({
+        ...writeDiaryDTO,
+        ...realWeather,
+        user,
+      });
+
       await this.diaryService.save(diary);
-    } catch (error) {
-      throw new HttpException(
-        'Failed to save diary entry. Please try again later.', 
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
 
-    return diary
-  };
+      return { result: true, type: "write" };
+    } catch (error) {
+      throw new ErrorHandler("SAVE_DATA");
+    }
+  }
+
+  async updateDiary(updateDiaryDTO: UpdateDiaryDTO, user: UserEntity) {
+    const { id: diaryIdToChange } = updateDiaryDTO;
+    try {
+      const diaryToBeChanged = await this.getSpecificDiary(diaryIdToChange, user);
+      
+    } catch (error) {}
+  }
+
+  // updateDiaryContent(toBeChanged, toChange:diar) {
+    
+  // }
+
+  async getSpecificDiary(diaryId: number, user: UserEntity) {
+    try {
+      const specificDiary = await this.diaryService.findOneOrFail({ where: { id: diaryId, user } });
+      return specificDiary;
+    } catch (error) {
+      throw new ErrorHandler("NOT_FOUND");
+    }
+  }
 
   async getRealWeather(lat: string, long: string, diaryDate: string) {
-    let [hour, min] = new Date().toLocaleTimeString('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      hour12:false
-    }).split(' ');
-
-    hour = hour === '24시' ? '00시' : hour;
-
-    const base_time = + min.replace('분', '') <= 10 ?
-      hour.replace('시', '') + '00':
-      hour.replace('시', min.slice(0, 2));
-    
-    const base_date = diaryDate.replaceAll('-', '');
-
+    const [base_time, base_date] = baseTimeDateMaker(diaryDate);
     const { x, y } = this.coordService.convertToGrid(lat, long);
 
     try {
-      const { data: { response: { body: { items: { item } } } } } =
-        await lastValueFrom(this.httpService.get(
-          process.env.WEATHER_URL +
-          process.env.WEATHER_KEY +
-          `&base_date=${base_date}` +
-          `&base_time=${base_time}` +
-          `&nx=${x}&ny=${y}`
-        ));
-      const toRet = this.coordService.filterWeatherValues(item);
-      return toRet;
+      const WEATHER_URL_STRING = makeWeatherURL([
+        base_date,
+        base_time,
+        `${x}`,
+        `${y}`,
+      ]);
+      const weatherResponse = await lastValueFrom(
+        this.httpService.get(WEATHER_URL_STRING)
+      );
 
+      const { data } = weatherResponse;
+      const { response } = data;
+      const { body } = response;
+      const { items } = body;
+      const { item } = items;
+
+      const toRet = this.coordService.filterWeatherValues(item);
+
+      return toRet;
     } catch (error) {
-      throw new HttpException('Failed to fetch weather data from external API', 500);
+      throw new ErrorHandler("WEATHER_API_ERROR");
     }
-  };
+  }
 
   async getDiaries(user: UserEntity) {
-    this.logger.log(`Fetching diaries for user: ${user.id}`);
+    try {
+      const diaries = await this.diaryService.find({
+        where: { user:{ id:user.id} },
+        order: { id: "DESC" },
+        relations: ["user"],
+        take: 5,
+        skip: 0,
+      });
+      return diaries;
+    } catch (error) {
+      throw new ErrorHandler("FETCH_DATA");
+    }
+  }
 
-    const diaries = await this.diaryService.find({
-      where: { user },
-      order: {
-        id:'DESC'
-      },
-      take: 5,
-      skip:0
-    });
+  async getMoreDiaries(user: UserEntity, lessId: number) {
+    try {
+      const diaries = await this.diaryService.find({
+        where: { user, id: LessThan(lessId) },
+        order: {
+          id: "DESC",
+        },
+        take: 5,
+        skip: 0,
+      });
 
-    return diaries
-
-  };
-
-  async getMoreDiaries(user:UserEntity,lessId:number) {
-    const diaries = await this.diaryService.find({
-      where: { user, id:LessThan(lessId)  },
-      order: {
-        id: 'DESC'
-      },
-      take: 5,
-      skip:0
-    });
-    
-    return diaries
-
+      return diaries;
+    } catch (error) {
+      throw new ErrorHandler("FETCH_DATA");
+    }
   }
 }

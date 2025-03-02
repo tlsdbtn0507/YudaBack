@@ -6,7 +6,6 @@ import { UserEntity } from './user.entity';
 import { JwtStrategy } from 'src/configs/jwt-strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { RefreshTokenMiddleWare } from 'src/configs/refreshMiddleWare';
 
 @Module({
   imports: [
@@ -17,7 +16,7 @@ import { RefreshTokenMiddleWare } from 'src/configs/refreshMiddleWare';
     TypeOrmModule.forFeature([UserEntity]),
   ],
   controllers: [UserController],
-  providers: [UserService,JwtStrategy,RefreshTokenMiddleWare],
+  providers: [UserService,JwtStrategy],
   exports:[JwtStrategy,PassportModule,UserService]
 })
 export class UserModule {}

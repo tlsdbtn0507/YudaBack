@@ -81,19 +81,17 @@ export class UserService {
     return { accessToken };
   }
 
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(isValidRefToken: string) {
     try {
-      const {
-        id,
-        refreshToken: isValidRefToken,
-        name,
-      } = await this.userService.findOne({ where: { refreshToken } });
+      const user = await this.userService.findOne({
+        where: { refreshToken: isValidRefToken },
+      });
 
-      if (!isValidRefToken || refreshToken !== isValidRefToken) {
+      if (!user || user.refreshToken !== isValidRefToken) {
         throw new UnauthorizedException("재로그인 필요");
       }
 
-      const newAccessToken = this.jwtService.sign({ nickName: id, name });
+      const newAccessToken = this.jwtService.sign({ nickName: user.userId, name: user.name });
 
       return newAccessToken;
     } catch (error) {
@@ -117,7 +115,7 @@ export class UserService {
     return false;
   }
 
-  async findUserById(userId: string): Promise<UserEntity | null> {
-    return await this.userService.findOne({ where: { userId } });
+  async findUserById(nickName: string): Promise<UserEntity | null> {
+    return await this.userService.findOne({ where: { userId: nickName } });
   }
 }
