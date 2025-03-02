@@ -11,8 +11,9 @@ import {
 import { DiaryService } from "./diary.service";
 import { WriteDiaryDTO } from "./dto/writeDiary.dto";
 import { UserEntity } from "src/user/user.entity";
-import { GetUser } from "src/configs/get-user.decorator";
 import { JwtAuthGuard } from "src/configs/JwtAuthGuard";
+import { GetUser } from "src/decorators/get-user.decorator";
+import { UpdateDiaryDTO } from "./dto/updateDiary.dto";
 
 @Controller("/api/diary")
 @UseGuards(JwtAuthGuard)
@@ -21,26 +22,28 @@ export class DiaryController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  writeDiary(
-    @Body() writeDiaryDTO: WriteDiaryDTO,
+  async writeOrUpdateDiary(
+    @Body() diaryDto: WriteDiaryDTO | UpdateDiaryDTO,
     @GetUser() user: UserEntity
   ) {
-    return this.diaryService.writeDiary(writeDiaryDTO, user);
+
+    const isDiaryExist = await this.diaryService.checkIsDiaryExist(diaryDto, user);
+
+    if (!isDiaryExist) {
+      const writeDiaryDTO = diaryDto as WriteDiaryDTO;
+      return await this.diaryService.writeDiary(writeDiaryDTO, user);
+    }
+    const updateDiaryDTO = diaryDto as UpdateDiaryDTO
+    return await this.diaryService.updateDiary(updateDiaryDTO, user);
   }
 
   @Get()
-  getDiaries(@GetUser() user: UserEntity) {
-    try {
-      return this.diaryService.getDiaries(user);
-    } catch (error) {
-      throw new Error("Could not fetch diaries");
-    }
+  async getDiaries(@GetUser() user: UserEntity) {
+    return await this.diaryService.getDiaries(user);
   }
 
   @Get("/:id")
-  getMoreDiaries(@GetUser() user: UserEntity, @Param("id") id: number) {
-    try {
-      return this.diaryService.getMoreDiaries(user, id);
-    } catch (error) {}
+  async getMoreDiaries(@GetUser() user: UserEntity, @Param("id") id: number) {
+    return await this.diaryService.getMoreDiaries(user, id);
   }
 }
