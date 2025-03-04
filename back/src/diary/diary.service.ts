@@ -131,7 +131,12 @@ export class DiaryService {
         take: 5,
         skip: 0,
       });
-      return diaries;
+      const sanitizedDiaries = diaries.map((diary) => {
+        const { user, ...diaryWithoutUser } = diary;
+        return diaryWithoutUser; // user 필드 제거 후 반환
+      });
+
+      return sanitizedDiaries;
     } catch (error) {
       throw new ErrorHandler("FETCH_DATA");
     }
