@@ -34,7 +34,7 @@ export class DiaryEntity extends BaseEntity {
   @Column({ type: "date" }) // 날짜 형식은 date 타입
   diaryDate: string;
 
-  @Column({ type: "varchar", nullable: false }) // 날짜 형식은 date 타
+  @Column({ type: "enum", enum: Days, nullable: false }) // 날짜 형식은 date 타
   dayOfWeek: Days;
 
   @Column({ type: "decimal", precision: 10, scale: 6, nullable: true }) // 위도 소수점 4자리까지
