@@ -15,6 +15,11 @@ import { JwtAuthGuard } from "src/configs/JwtAuthGuard";
 import { GetUser } from "src/decorators/get-user.decorator";
 import { UpdateDiaryDTO } from "./dto/updateDiary.dto";
 
+class TodayDiaryDTO {
+  diaryDate: string;
+}
+
+
 @Controller("/api/diary")
 @UseGuards(JwtAuthGuard)
 export class DiaryController {
@@ -26,15 +31,26 @@ export class DiaryController {
     @Body() diaryDto: WriteDiaryDTO | UpdateDiaryDTO,
     @GetUser() user: UserEntity
   ) {
-
-    const isDiaryExist = await this.diaryService.checkIsDiaryExist(diaryDto, user);
+    const isDiaryExist = await this.diaryService.checkIsDiaryExist(
+      diaryDto,
+      user
+    );
 
     if (!isDiaryExist) {
       const writeDiaryDTO = diaryDto as WriteDiaryDTO;
       return await this.diaryService.writeDiary(writeDiaryDTO, user);
     }
-    const updateDiaryDTO = diaryDto as UpdateDiaryDTO
+    const updateDiaryDTO = diaryDto as UpdateDiaryDTO;
     return await this.diaryService.updateDiary(updateDiaryDTO, user);
+  }
+
+
+  @Post("/today")
+  async getDiaryByToday(
+    @Body() body: TodayDiaryDTO,
+    @GetUser() user: UserEntity
+  ) {
+    return await this.diaryService.getDiaryByToday(user, body.diaryDate);
   }
 
   @Get()
