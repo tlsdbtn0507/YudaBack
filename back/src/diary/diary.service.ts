@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DiaryEntity } from "./diary.entity";
-import { LessThan, Repository } from "typeorm";
+import { LessThan, Raw, Repository } from "typeorm";
 import { WriteDiaryDTO } from "./dto/writeDiary.dto";
 import { UserEntity } from "src/user/user.entity";
 import { HttpService } from "@nestjs/axios";
@@ -156,6 +156,26 @@ export class DiaryService {
       return diaries;
     } catch (error) {
       throw new ErrorHandler("FETCH_DATA");
+    }
+  }
+
+  async getDiaryByToday(user: UserEntity, date: string) {
+    try {
+      const [month, day] = date.split("-").slice(1);
+      const lastTodayDiary = await this.diaryService.findOne({
+        where: {
+          user: { id: user.id },
+          diaryDate: Raw(
+            (alias) =>
+              `TO_CHAR(${alias}, 'MM-DD') = '${month}-${day}' AND ${alias} != '${date}'`
+          ),
+        },
+      });
+      if (!lastTodayDiary) {
+        return false;
+      }
+    } catch (error) {
+      throw new ErrorHandler("FETCH_DATA_TODAY");
     }
   }
 }
