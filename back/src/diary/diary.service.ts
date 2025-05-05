@@ -5,12 +5,14 @@ import { LessThan, Raw, Repository } from "typeorm";
 import { WriteDiaryDTO } from "./dto/writeDiary.dto";
 import { UserEntity } from "src/user/user.entity";
 import { HttpService } from "@nestjs/axios";
-import { lastValueFrom } from "rxjs";
+import { lastValueFrom, merge } from "rxjs";
 import { CoordService } from "src/coords/coords.service";
 import { makeWeatherURL } from "src/util/constantsUtil";
 import { baseTimeDateMaker } from "src/util/dateUtil";
 import { ErrorHandler } from "src/util/errorHandlers";
 import { UpdateDiaryDTO } from "./dto/updateDiary.dto";
+// import _merge from "lodash/merge";
+import * as _ from "lodash";
 
 type WeatherData = {
   rainCod: string;
@@ -72,21 +74,24 @@ export class DiaryService {
     }
   }
 
-  async updateDiary(updateDiaryDTO: UpdateDiaryDTO, user: UserEntity) {
+  async updateDiary(updateDiaryDTO: UpdateDiaryDTO,diaryIdToUpdate:number, user: UserEntity) {
     const { id: diaryIdToChange } = updateDiaryDTO;
     try {
-      const diaryToBeChanged = await this.getSpecificDiary(diaryIdToChange, user);
-      
-    } catch (error) {}
-  }
+      const diaryToBeChanged = await this.getSpecificDiary(diaryIdToUpdate, user);
 
-  // updateDiaryContent(toBeChanged, toChange:diar) {
-    
-  // }
+      _.merge(diaryToBeChanged, updateDiaryDTO);
+
+      await this.diaryService.save(diaryToBeChanged);
+
+      return { result: true, type: "update" };
+    } catch (error) {
+      throw new ErrorHandler("UPDATE_DATA");
+    }
+  }
 
   async getSpecificDiary(diaryId: number, user: UserEntity) {
     try {
-      const specificDiary = await this.diaryService.findOneOrFail({ where: { id: diaryId, user } });
+      const specificDiary = await this.diaryService.findOneOrFail({ where: { id: diaryId, user: { id: user.id } } });
       return specificDiary;
     } catch (error) {
       throw new ErrorHandler("NOT_FOUND");

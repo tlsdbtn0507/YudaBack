@@ -31,17 +31,15 @@ export class DiaryController {
     @Body() diaryDto: WriteDiaryDTO | UpdateDiaryDTO,
     @GetUser() user: UserEntity
   ) {
-    const isDiaryExist = await this.diaryService.checkIsDiaryExist(
-      diaryDto,
-      user
-    );
+    const isDiaryExist = await this.diaryService.checkIsDiaryExist(diaryDto, user);
 
     if (!isDiaryExist) {
       const writeDiaryDTO = diaryDto as WriteDiaryDTO;
       return await this.diaryService.writeDiary(writeDiaryDTO, user);
     }
+    
     const updateDiaryDTO = diaryDto as UpdateDiaryDTO;
-    return await this.diaryService.updateDiary(updateDiaryDTO, user);
+    return await this.diaryService.updateDiary(updateDiaryDTO,isDiaryExist, user);
   }
 
 
