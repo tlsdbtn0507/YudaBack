@@ -1,4 +1,6 @@
-// jest.config.ts
+import { pathsToModuleNameMapper } from "ts-jest";
+import { compilerOptions } from "./tsconfig.json";
+
 import type { Config } from "jest";
 
 const config: Config = {
@@ -11,6 +13,10 @@ const config: Config = {
   collectCoverageFrom: ["**/*.(t|j)s"],
   coverageDirectory: "../coverage",
   testEnvironment: "node",
+  moduleNameMapper: {
+    "^src/(.*)$": "<rootDir>/$1", //수동 매핑
+  },
+  preset: "ts-jest",
 };
 
 export default config;
