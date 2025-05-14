@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { UserService } from "src/user/user.service";
 
@@ -14,7 +14,7 @@ export class JwtAuthGuard implements CanActivate {
     const { authorization } = request.headers;
 
     if (!authorization) {
-      return false;
+      throw new UnauthorizedException("Authorization이 없습니다.")
     }
 
     const token = authorization.split(" ")[1];

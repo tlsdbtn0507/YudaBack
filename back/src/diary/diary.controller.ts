@@ -7,6 +7,7 @@ import {
   Get,
   Param,
   UseGuards,
+  Headers,
 } from "@nestjs/common";
 import { DiaryService } from "./diary.service";
 import { WriteDiaryDTO } from "./dto/writeDiary.dto";
@@ -14,10 +15,6 @@ import { UserEntity } from "src/user/user.entity";
 import { JwtAuthGuard } from "src/configs/JwtAuthGuard";
 import { GetUser } from "src/decorators/get-user.decorator";
 import { UpdateDiaryDTO } from "./dto/updateDiary.dto";
-
-class TodayDiaryDTO {
-  diaryDate: string;
-}
 
 
 @Controller("/api/diary")
@@ -45,10 +42,10 @@ export class DiaryController {
 
   @Post("/today")
   async getDiaryByToday(
-    @Body() body: TodayDiaryDTO,
+    @Body() body: { timezone: string },
     @GetUser() user: UserEntity
   ) {
-    return await this.diaryService.getDiaryByToday(user, body.diaryDate);
+    return await this.diaryService.getDiaryByToday(user,  body.timezone );
   }
 
   @Get()

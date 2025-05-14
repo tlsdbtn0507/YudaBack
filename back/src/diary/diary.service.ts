@@ -1,18 +1,26 @@
-import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DiaryEntity } from "./diary.entity";
-import { LessThan, Raw, Repository } from "typeorm";
+import { LessThan, Repository, Raw } from "typeorm";
 import { WriteDiaryDTO } from "./dto/writeDiary.dto";
 import { UserEntity } from "src/user/user.entity";
 import { HttpService } from "@nestjs/axios";
-import { lastValueFrom, merge } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import { CoordService } from "src/coords/coords.service";
 import { makeWeatherURL } from "src/util/constantsUtil";
 import { baseTimeDateMaker } from "src/util/dateUtil";
 import { ErrorHandler } from "src/util/errorHandlers";
 import { UpdateDiaryDTO } from "./dto/updateDiary.dto";
-// import _merge from "lodash/merge";
+
 import * as _ from "lodash";
+import * as dayjs from "dayjs";
+
+import * as utc from "dayjs/plugin/utc";
+import * as timezone from "dayjs/plugin/timezone";
+
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type WeatherData = {
   rainCod: string;
@@ -164,23 +172,27 @@ export class DiaryService {
     }
   }
 
-  async getDiaryByToday(user: UserEntity, date: string) {
+  async getDiaryByToday(user: UserEntity, timezonString: string) {
     try {
+      const date = dayjs().tz(timezonString).format("YYYY-MM-DD");
       const [month, day] = date.split("-").slice(1);
+
       const lastTodayDiary = await this.diaryService.findOne({
         where: {
           user: { id: user.id },
           diaryDate: Raw(
-            (alias) =>
-              `TO_CHAR(${alias}, 'MM-DD') = '${month}-${day}' AND ${alias} != '${date}'`
+            (alias) => `TO_CHAR(${alias}, 'MM-DD') = :mmdd`,
+            { mmdd: `${month}-${day}` }
           ),
         },
       });
-      if (!lastTodayDiary) {
-        return false;
-      }
+
+      if (!lastTodayDiary) return false;
+
+      return lastTodayDiary;
+
     } catch (error) {
-      throw new ErrorHandler("FETCH_DATA_TODAY");
+      throw new ErrorHandler("FETCH_DATA_TODAY" );
     }
   }
 }
