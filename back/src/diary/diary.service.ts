@@ -181,9 +181,9 @@ export class DiaryService {
         where: {
           user: { id: user.id },
           diaryDate: Raw(
-            (alias) => `TO_CHAR(${alias}, 'MM-DD') = :mmdd`,
-            { mmdd: `${month}-${day}` }
-          ),
+            () => `TO_CHAR("diaryDate", 'MM-DD') = :mmdd AND "diaryDate" != :today`,
+            { mmdd: `${month}-${day}`, today: date, }
+          ),   
         },
       });
 
